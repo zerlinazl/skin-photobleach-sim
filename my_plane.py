@@ -93,3 +93,42 @@ class MyPlane:
 
         y = hy - (nx * (x0 - hx) + nz * (z0 - hz)) / ny
         return np.array([x0, y, z0])
+
+    def compute_line_intersection_variable_z(self, x0: float, z0, z_delta: float) -> np.array:
+        """
+        Intersection of plane with line:
+
+            x = x0
+            y = t
+            z = z0 + z_delta * y
+        """
+
+        nx, ny, nz = self.normal_vector
+        hx, hy, hz = self.h
+
+        numerator = -(nx * (x0 - hx) + nz * (z0 - hz) - ny * hy)
+        denominator = ny + nz * z_delta
+
+        y = numerator / denominator
+        z = z0 + z_delta * y
+
+        return np.array([x0, y, z])
+
+
+    def compute_line_intersection_angled_xlim(self, beta0: float, beta1: float, z0: float, x_start: float, x_end: float) -> np.array:
+        """
+        Compute the physical position of intersection of a line of the form [x, y=beta1*x+beta0, z0] with the plane.
+        Line is limited to the range [x_start, x_end].
+        """
+
+        nx, ny, nz = self.normal_vector
+        hx, hy, hz = self.h
+
+        x = (nx * hx + ny * (hy - beta0) - nz * (z0 - hz)) / (nx + ny * beta1)
+        y = beta1 * x + beta0
+
+        # Check if intersection lies within the segment
+        if not (x_start <= x <= x_end):
+            return np.array([np.nan, np.nan, np.nan])
+
+        return np.array([x, y, z0])

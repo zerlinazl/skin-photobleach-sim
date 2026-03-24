@@ -10,7 +10,8 @@ def compare_error_between_two_designs(
         photobleach_pattern_1: PhotobleachPattern,
         my_plane_1: MyPlane,
         photobleach_pattern_2: PhotobleachPattern,
-        my_plane_2: MyPlane
+        my_plane_2: MyPlane,
+        printss: bool = False,
 ) -> tuple[np.ndarray, float]:
     """
     Compare how many pixels the photobleach pattern moves on plane between two designs.
@@ -30,14 +31,25 @@ def compare_error_between_two_designs(
     A2_u_pix, A2_v_pix = my_plane_2.physical_to_pix(A2)
     B2_u_pix, B2_v_pix = my_plane_2.physical_to_pix(B2)
     C2_u_pix, C2_v_pix = my_plane_2.physical_to_pix(C2)
+    
+    if printss== True:
+        print("B position:",B1_u_pix, B1_v_pix, B2_u_pix, B2_v_pix)
 
+    # delta_vector = np.array([
+    #     A1_u_pix - A2_u_pix,
+    #     A1_v_pix - A2_v_pix,
+    #     B1_u_pix - B2_u_pix,
+    #     B1_v_pix - B2_v_pix,
+    #     C1_u_pix - C2_u_pix,
+    #     C1_v_pix - C2_v_pix,
+    # ], dtype=float)
     delta_vector = np.array([
-        A1_u_pix - A2_u_pix,
-        A1_v_pix - A2_v_pix,
-        B1_u_pix - B2_u_pix,
-        B1_v_pix - B2_v_pix,
-        C1_u_pix - C2_u_pix,
-        C1_v_pix - C2_v_pix,
+        A2_u_pix - A1_u_pix,
+        A2_v_pix - A1_v_pix,
+        B2_u_pix - B1_u_pix,
+        B2_v_pix - B1_v_pix,
+        C2_u_pix - C1_u_pix,
+        C2_v_pix - C1_v_pix,
     ], dtype=float)
 
     magnitude = float(np.max(np.abs(delta_vector)))
@@ -76,15 +88,88 @@ def compare_error_between_two_designs4(
     C2_u_pix, C2_v_pix = my_plane_2.physical_to_pix(C2)
     D2_u_pix, D2_v_pix = my_plane_2.physical_to_pix(D2)
 
+    # delta_vector = np.array([
+    #     A1_u_pix - A2_u_pix,
+    #     A1_v_pix - A2_v_pix,
+    #     B1_u_pix - B2_u_pix,
+    #     B1_v_pix - B2_v_pix,
+    #     C1_u_pix - C2_u_pix,
+    #     C1_v_pix - C2_v_pix,
+    #     D1_u_pix - D2_u_pix,
+    #     D1_v_pix - D2_v_pix,
+    # ], dtype=float)
+
     delta_vector = np.array([
-        A1_u_pix - A2_u_pix,
-        A1_v_pix - A2_v_pix,
-        B1_u_pix - B2_u_pix,
-        B1_v_pix - B2_v_pix,
-        C1_u_pix - C2_u_pix,
-        C1_v_pix - C2_v_pix,
-        D1_u_pix - D2_u_pix,
-        D1_v_pix - D2_v_pix,
+        A2_u_pix - A1_u_pix,
+        A2_v_pix - A1_v_pix,
+        B2_u_pix - B1_u_pix,
+        B2_v_pix - B1_v_pix,
+        C2_u_pix - C1_u_pix,
+        C2_v_pix - C1_v_pix,
+        D2_u_pix - D1_u_pix,
+        D2_v_pix - D1_v_pix,
+    ], dtype=float)
+
+    magnitude = float(np.max(np.abs(delta_vector)))
+    if magnitude == 0.0:
+        normalized_vector = np.zeros(8, dtype=float)
+    else:
+        normalized_vector = delta_vector / magnitude
+
+    return normalized_vector, magnitude
+
+def compare_error_between_two_designs5(
+        photobleach_pattern_1: PhotobleachPattern,
+        my_plane_1: MyPlane,
+        photobleach_pattern_2: PhotobleachPattern,
+        my_plane_2: MyPlane
+) -> tuple[np.ndarray, float]:
+    """
+    Compare how many pixels the photobleach pattern moves on plane between two designs.
+    Returns:
+    - normalized_vector: [A_u, A_v, B_u, B_v, C_u, C_v, D_u, D_v, E_u, E_v] normalized by max abs component (range [-1, 1])
+    - magnitude: max absolute component before normalization
+    """
+
+    # Design 1
+    A1, B1, C1, D1, E1 = photobleach_pattern_1.forward_model_nonparametric(my_plane_1)
+    A1_u_pix, A1_v_pix = my_plane_1.physical_to_pix(A1)
+    B1_u_pix, B1_v_pix = my_plane_1.physical_to_pix(B1)
+    C1_u_pix, C1_v_pix = my_plane_1.physical_to_pix(C1)
+    D1_u_pix, D1_v_pix = my_plane_1.physical_to_pix(D1)
+    E1_u_pix, E1_v_pix = my_plane_1.physical_to_pix(E1)
+
+    # Design 2
+    A2, B2, C2, D2, E2 = photobleach_pattern_2.forward_model_nonparametric(my_plane_2)
+    A2_u_pix, A2_v_pix = my_plane_2.physical_to_pix(A2)
+    B2_u_pix, B2_v_pix = my_plane_2.physical_to_pix(B2)
+    C2_u_pix, C2_v_pix = my_plane_2.physical_to_pix(C2)
+    D2_u_pix, D2_v_pix = my_plane_2.physical_to_pix(D2)
+    E2_u_pix, E2_v_pix = my_plane_2.physical_to_pix(E2)
+
+    # delta_vector = np.array([
+    #     A1_u_pix - A2_u_pix,
+    #     A1_v_pix - A2_v_pix,
+    #     B1_u_pix - B2_u_pix,
+    #     B1_v_pix - B2_v_pix,
+    #     C1_u_pix - C2_u_pix,
+    #     C1_v_pix - C2_v_pix,
+    #     D1_u_pix - D2_u_pix,
+    #     D1_v_pix - D2_v_pix,
+    #     E1_u_pix - E2_u_pix,
+    #     E1_v_pix - E2_v_pix,
+    # ], dtype=float)
+    delta_vector = np.array([
+        A2_u_pix - A1_u_pix,
+        A2_v_pix - A1_v_pix,
+        B2_u_pix - B1_u_pix,
+        B2_v_pix - B1_v_pix,
+        C2_u_pix - C1_u_pix,
+        C2_v_pix - C1_v_pix,
+        D2_u_pix - D1_u_pix,
+        D2_v_pix - D1_v_pix,
+        E2_u_pix - E1_u_pix,
+        E2_v_pix - E1_v_pix,
     ], dtype=float)
 
     magnitude = float(np.max(np.abs(delta_vector)))
