@@ -58,7 +58,57 @@ class PhotobleachPattern:
 
         return A_nonparametric, B_nonparametric, C_nonparametric
 
+class PhotobleachPattern3Z:
+    def __init__(
+            self,
+            A_x_um: float, A_z_um: float,
+            beta1: float, beta0_um: float, B_z_um: float,
+            C_x_um: float, C_z_delta: float):
+        self.A_x_um = A_x_um
+        self.A_z_um = A_z_um
+        self.beta1 = beta1
+        self.beta0_um = beta0_um
+        self.B_z_um = B_z_um
+        self.C_x_um = C_x_um
+        self.C_z_delta = C_z_delta
+        self.C_z0 = 0
 
+    def copy(self) -> "PhotobleachPattern":
+        """Create an independent copy of this photobleach pattern."""
+        return PhotobleachPattern3Z(
+            A_x_um=float(self.A_x_um),
+            A_z_um=float(self.A_z_um),
+            beta1=float(self.beta1),
+            beta0_um=float(self.beta0_um),
+            B_z_um=float(self.B_z_um),
+            C_x_um=float(self.C_x_um),
+            C_z_delta=float(self.C_z_delta),
+        )
+
+    def forward_model_parametric(self, my_plane: MyPlane, A_u_pix, A_v_pix, B_u_pix, B_v_pix, C_u_pix, C_v_pix) -> (
+            np.array, np.array, np.array, np.array, np.array, np.array):
+        """
+        Accepts a plane and pixel positions of the intersection and returns the calculation of intersection
+        points A,B,C
+        """
+
+        A_parametric = my_plane.pix_to_physical(A_u_pix, A_v_pix)
+        B_parametric = my_plane.pix_to_physical(B_u_pix, B_v_pix)
+        C_parametric = my_plane.pix_to_physical(C_u_pix, C_v_pix)
+
+        return A_parametric, B_parametric, C_parametric
+
+    def forward_model_nonparametric(self, my_plane: MyPlane):
+        """
+        Accepts a plane  returns the calculation of intersection
+        points A,B,C
+        """
+
+        A_nonparametric = my_plane.compute_line_intersection_parallel_x(self.A_x_um, self.A_z_um)
+        B_nonparametric = my_plane.compute_line_intersection_angled(self.beta0_um, self.beta1, self.B_z_um)
+        C_nonparametric = my_plane.compute_line_intersection_variable_z(self.C_x_um, self.C_z0, self.C_z_delta)
+
+        return A_nonparametric, B_nonparametric, C_nonparametric
 
 class PhotobleachPattern4:
     def __init__(

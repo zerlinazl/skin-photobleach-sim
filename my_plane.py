@@ -7,7 +7,7 @@ def _check_dim(vec):
 
 
 class MyPlane:
-    def __init__(self, u: np.array, v: np.array, h: np.array):
+    def __init__(self, u: np.array, v: np.array, h: np.array, *, skip_checks: bool = False):
         """ Initialize from plane parameters u(vec), v(vec), h(vec)"""
 
         # Check dimensions
@@ -15,10 +15,11 @@ class MyPlane:
         _check_dim(v)
         _check_dim(h)
 
-        # Check orthogonality
-        dot_product = np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
-        if abs(dot_product) > 0.2:
-            raise ValueError("u and v are not orthogonal.")
+        if not skip_checks:
+            # Check orthogonality
+            dot_product = np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
+            if abs(dot_product) > 0.2:
+                raise ValueError("u and v are not orthogonal.")
 
         # Store
         self.u = u
@@ -63,7 +64,7 @@ class MyPlane:
 
     def copy(self) -> "MyPlane":
         """Create an independent copy of this plane."""
-        return MyPlane(np.copy(self.u), np.copy(self.v), np.copy(self.h))
+        return MyPlane(np.copy(self.u), np.copy(self.v), np.copy(self.h), skip_checks=True)
 
     def distance_to_point(self, pt: np.array) -> float:
         """Compute Euclidean distance from point pt to this plane."""
